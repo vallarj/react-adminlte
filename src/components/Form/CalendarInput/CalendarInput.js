@@ -8,6 +8,7 @@ import PickerContainer from "./PickerContainer";
 
 import {Manager, Reference, Popper} from 'react-popper';
 import ResizeAware from 'react-resize-aware';
+import Input from "./Input";
 
 class CalendarInput extends React.Component {
     constructor(props) {
@@ -119,34 +120,8 @@ class CalendarInput extends React.Component {
         this.setState({currentMonth: date});
     };
 
-    resolveDisplayValue = () => {
-        const {value, datePicker, timePicker} = this.props;
-        let display = "";
-
-        if(moment.isMoment(value)) {
-            const format = [];
-
-            if(datePicker || !timePicker) {
-                format.push("Y/MM/DD");
-            }
-
-            if(timePicker) {
-                format.push("hh:mm A");
-            }
-
-            display = value.format(format.join(' '));
-        }
-
-        return display;
-    };
-
     render() {
         const errors = this.props.errors[this.props.name] || [];
-        const display = this.resolveDisplayValue();
-        const inputStyle = {
-            backgroundColor: this.props.disabled ? "#eee" : "#fff",
-            borderColor: this.state.isFocused ? "#3c8dbc" : undefined
-        };
 
         return (
             <div className={"form-group " + (errors.length > 0 ? "has-error " : "") + (this.props.gridClass || "")}
@@ -167,11 +142,10 @@ class CalendarInput extends React.Component {
                                     <div className="input-group-addon">
                                         <i className={this.props.iconClass}/>
                                     </div>
-                                    <div ref={ref} style={{overflow: "auto"}}>
-                                        <input className="form-control" style={inputStyle} value={display}
-                                               ref={this.setInputRef} onFocus={this.handleInputFocus} readOnly
-                                               disabled={this.props.disabled}/>
-                                    </div>
+                                    <Input selectedValue={this.props.value} innerRef={this.setInputRef} containerRef={ref}
+                                           onFocus={this.handleInputFocus} disabled={this.props.disabled}
+                                           datePicker={this.props.datePicker} timePicker={this.props.timePicker}
+                                           isFocused={this.state.isFocused}/>
                                 </div>
                             }
                         </Reference>
