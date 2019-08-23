@@ -13,7 +13,7 @@ class Input extends React.Component {
         this.selectionEnd = 0;
     }
 
-    componentDidUpdate(prevProps, prevState) {
+    componentDidUpdate(prevProps) {
         const {selectedValue} = this.props;
 
         if(selectedValue !== prevProps.selectedValue) {
@@ -42,9 +42,13 @@ class Input extends React.Component {
         return display;
     };
 
-    dateReplaceAtPosition = (value, position, insertion) => {
+    dateReplaceAtPosition = (value, position, insertion, offset) => {
         let newValue = value.substring(0, position);
-        let offset = 0, dayStale = false;
+        let addedChars = 0, dayStale = false;
+
+        const offsetPosition = position;
+        position -= offset;
+
         if(insertion) {
             let newInsertion = "";
             if(position < 4) {
@@ -56,8 +60,9 @@ class Input extends React.Component {
                 newInsertion = '/';
             } else if(position === 4 || position === 5) {
                 if(insertion.match(/^\d$/)) {
-                    if(value[6]) {
-                        const month = insertion + value[6];
+                    const onesMonth = value[this.getOffsetPosition(6, offset)];
+                    if(onesMonth) {
+                        const month = insertion + onesMonth;
                         if(month > '12') {
                             newInsertion = '12';
                         } else if(month < '01') {
@@ -76,7 +81,7 @@ class Input extends React.Component {
                 }
             } else if(position === 6) {
                 if(insertion.match(/^\d$/)) {
-                    const month = value[5] + insertion;
+                    const month = value[this.getOffsetPosition(5, offset)] + insertion;
                     if (month > '12') {
                         newInsertion = '2'
                     } else if(month < '01') {
@@ -92,8 +97,9 @@ class Input extends React.Component {
                 if(insertion.match(/^\d$/)) {
                     const daysInMonth = moment(value.substring(0, 7), 'YYYY/MM').daysInMonth().toString(10);
                     if(position === 7 || position === 8) {
-                        if(value[9]) {
-                            const day = insertion + value[9];
+                        const onesDay = value[this.getOffsetPosition(9, offset)];
+                        if(onesDay) {
+                            const day = insertion + onesDay;
                             if(day > daysInMonth) {
                                 newInsertion = daysInMonth;
                             } else if(day < '01') {
@@ -109,7 +115,7 @@ class Input extends React.Component {
                             newInsertion = '/' + newInsertion;
                         }
                     } else if(position === 9) {
-                        const day = value[8] + insertion;
+                        const day = value[this.getOffsetPosition(8, offset)] + insertion;
                         if(day > daysInMonth) {
                             newInsertion = daysInMonth[1];
                         } else if(day < '01') {
@@ -121,14 +127,14 @@ class Input extends React.Component {
                 }
             }
 
-            offset = newInsertion.length;
-            const newPosition = position + offset;
-            if((newPosition === 4 || newPosition === 7) && offset) {
+            addedChars = newInsertion.length;
+            const newPosition = position + addedChars;
+            if((newPosition === 4 || newPosition === 7) && addedChars) {
                 newInsertion += '/';
-                offset++;
+                addedChars++;
             }
 
-            newValue += newInsertion + value.substring(position + offset);
+            newValue += newInsertion + value.substring(offsetPosition + addedChars);
 
             if(dayStale && newValue.length >= 10) {
                 const daysInMonth = moment(newValue.substring(0, 7), 'YYYY/MM').daysInMonth().toString(10);
@@ -141,20 +147,28 @@ class Input extends React.Component {
 
         return [
             newValue,
-            offset
+            addedChars
         ];
     };
 
-    timeReplaceAtPosition = (value, position, insertion) => {
-        console.log({value, position, insertion});
+    getOffsetPosition = (position, offset) => {
+        return position + offset;
+    };
+
+    timeReplaceAtPosition = (value, position, insertion, offset) => {
         let newValue = value.substring(0, position);
-        let offset = 0;
+        let addedChars = 0;
+
+        const offsetPosition = position;
+        position -= offset;
+
         if(insertion) {
             let newInsertion = "";
             if(position === 0) {
                 if(insertion.match(/^\d$/)) {
-                    if(value[1]) {
-                        const hour = insertion + value[1];
+                    const onesHour = value[this.getOffsetPosition(1, offset)];
+                    if(onesHour) {
+                        const hour = insertion + onesHour;
                         if(hour > '12') {
                             newInsertion = '12';
                         } else if(hour < '01') {
@@ -168,7 +182,7 @@ class Input extends React.Component {
                 }
             } else if(position === 1) {
                 if(insertion.match(/^\d$/)) {
-                    const hour = value[0] + insertion;
+                    const hour = value[this.getOffsetPosition(0, offset)] + insertion;
                     if(hour > '12') {
                         newInsertion = '2';
                     } else if(hour < '01') {
@@ -181,8 +195,9 @@ class Input extends React.Component {
                 newInsertion = ':';
             } else if(position === 2 || position === 3) {
                 if(insertion.match(/^\d$/)) {
-                    if(value[4]) {
-                        const minute = insertion + value[4];
+                    const onesMinute = value[this.getOffsetPosition(4, offset)];
+                    if(onesMinute) {
+                        const minute = insertion + onesMinute;
                         if(minute > '59') {
                             newInsertion = '00';
                         } else {
@@ -218,80 +233,125 @@ class Input extends React.Component {
                 }
             }
 
-            offset = newInsertion.length;
-            const newPosition = position + offset;
-            if(newPosition === 2 && offset) {
+            addedChars = newInsertion.length;
+            const newPosition = position + addedChars;
+            if(newPosition === 2 && addedChars) {
                 newInsertion += ':';
-                offset++;
+                addedChars++;
             }
 
-            if(newPosition === 5 && offset) {
+            if(newPosition === 5 && addedChars) {
                 newInsertion += ' ';
-                offset++;
+                addedChars++;
             }
 
-            newValue += newInsertion + value.substring(position + offset);
+            newValue += newInsertion + value.substring(offsetPosition + addedChars);
         }
 
-        console.log({value, newValue, offset});
         return [
             newValue,
-            offset
+            addedChars
         ];
     };
 
-    dateDeleteAtPosition = (value, position) => {
-        if(position + 1 === value.length) {
+    dateDeleteAtPosition = (value, position, offset) => {
+        const offsetPosition = position;
+        position -= offset;
+
+        if(offsetPosition + 1 === value.length) {
             if(position === 4 || position === 7) {
-                return [value.substring(0, position - 1), 2];
+                return [value.substring(0, offsetPosition - 1), 2];
             }
 
-            return [value.substring(0, position), 1];
+            return [value.substring(0, offsetPosition), 1];
         }
 
         if(position === 4 || position === 7) {
-            return [this.dateReplaceAtPosition(value, position - 1, "0")[0], 2]
+            return [this.dateReplaceAtPosition(value, offsetPosition - 1, "0", offset)[0], 2]
         }
 
-        if((position === 3 || position === 6) && position + 2 === value.length) {
-            return [value.substring(0, position), 1];
+        if((position === 3 || position === 6) && offsetPosition + 2 === value.length) {
+            return [value.substring(0, offsetPosition), 1];
         }
 
-        return [this.dateReplaceAtPosition(value, position, "0")[0], 1];
+        return [this.dateReplaceAtPosition(value, offsetPosition, "0", offset)[0], 1];
     };
 
-    timeDeleteAtPosition = (value, position) => {
-        if(position + 1 === value.length) {
+    timeDeleteAtPosition = (value, position, offset) => {
+        const offsetPosition = position;
+        position -= offset;
+
+        if(offsetPosition + 1 === value.length) {
             if(position === 2 || position === 5) {
-                return [value.substring(0, position - 1), 2];
+                return [value.substring(0, offsetPosition - 1), 2];
             }
 
             if(position === 7) {
-                return [value.substring(0, position - 1), 2];
+                return [value.substring(0, offsetPosition - 1), 2];
             }
 
-            return [value.substring(0, position), 1];
+            return [value.substring(0, offsetPosition), 1];
         }
 
         if(position === 2 || position === 5) {
-            return [this.timeReplaceAtPosition(value, position - 1, "0")[0], 2];
+            return [this.timeReplaceAtPosition(value, offsetPosition - 1, "0", offset)[0], 2];
         }
 
-        if((position === 1 || position === 4 || position === 6) && position + 2 === value.length) {
-            return [value.substring(0, position), 1];
+        if((position === 1 || position === 4 || position === 6) && offsetPosition + 2 === value.length) {
+            return [value.substring(0, offsetPosition), 1];
         }
 
-        return [this.timeReplaceAtPosition(value, position, "0")[0], 1];
+        return [this.timeReplaceAtPosition(value, offsetPosition, "0", offset)[0], 1];
     };
 
     replaceAtPosition = (value, position, insertion) => {
-        // return this.dateReplaceAtPosition(value, position, insertion);
-        return this.timeReplaceAtPosition(value, position, insertion);
+        const {datePicker, timePicker} = this.props;
+        if(datePicker) {
+            if(position <= 9) {
+                return this.dateReplaceAtPosition(value, position, insertion, 0);
+            } else if(timePicker) {
+                if(position === 10) {
+                    if(insertion === ' ') {
+                        return [value.substring(0, position) + ' ' + value.substring(position + 1), 1];
+                    } else if(insertion.match(/^\d$/)) {
+                        value = value.substring(0, position) + ' ' + value.substring(position + 1);
+                        const [newValue, offset] = this.timeReplaceAtPosition(value, position + 1, insertion, 11);
+                        return [newValue, offset + 1];
+                    }
+                } else {
+                    return this.timeReplaceAtPosition(value, position, insertion, 11);
+                }
+            }
+
+            return [value, 0];
+        } else if(timePicker) {
+            return this.timeReplaceAtPosition(value, position, insertion, 0);
+        }
+
+        return [value, 0];
     };
 
     deleteAtPosition = (value, position) => {
-        // return this.dateDeleteAtPosition(value, position);
-        return this.timeDeleteAtPosition(value, position);
+        const {datePicker, timePicker} = this.props;
+        if(datePicker) {
+            if(position <= 9) {
+                return this.dateDeleteAtPosition(value, position, 0);
+            } else if(timePicker) {
+                if(position === 10) {
+                    if(value.length === position + 1) {
+                        value = value.substring(0, position);
+                    }
+                    const [newValue, offset] = this.dateDeleteAtPosition(value, position - 1, 0);
+                    return [newValue, offset + 1];
+                } else {
+                    return this.timeDeleteAtPosition(value, position, 11);
+                }
+            }
+        } else if(timePicker) {
+            return this.timeDeleteAtPosition(value, position, 0);
+        }
+
+        return [value, 0];
     };
 
     handleChange = event => {
@@ -330,9 +390,31 @@ class Input extends React.Component {
         }
 
         const newCursor = deleteOffset ? cursor : changeStart + offset;
+
+        // Set component value if complete
+        if(this.isComplete(newValue)) {
+            const date = moment(newValue, "YYYY/MM/DD hh:mm A");
+            this.props.onDatePick(date);
+        }
+
         this.setState({display: newValue}, () => {
             target.setSelectionRange(newCursor, newCursor);
         });
+    };
+
+    isComplete = value => {
+        const {datePicker, timePicker} = this.props;
+        if(datePicker) {
+            if(timePicker) {
+                return value.length === 19
+            }
+        }
+
+        if(timePicker) {
+            return value.length === 8;
+        }
+
+        return value.length === 10;
     };
 
     handleSelect = event => {
@@ -341,10 +423,24 @@ class Input extends React.Component {
         this.selectionEnd = selectionEnd;
     };
 
+    getMask = () => {
+        const {datePicker, timePicker} = this.props;
+        let mask = [];
+        if(datePicker) {
+            mask.push("yyyy/mm/dd");
+        }
+
+        if(timePicker) {
+            mask.push("hh:mm aa");
+        }
+
+        return mask.join(' ');
+    };
+
     render() {
         const {disabled, innerRef, onFocus} = this.props;
         const {display} = this.state;
-        const mask = "yyyy/mm/dd hh:mm aa";
+        const mask = this.getMask();
 
         const inputStyle = {
             //backgroundColor: this.props.disabled ? "#eee" : "#fff",
