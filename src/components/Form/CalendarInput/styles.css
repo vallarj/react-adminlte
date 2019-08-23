@@ -252,8 +252,15 @@ span.dralt-cal-selected:hover {
     color: #aaa;
     background: white;
     border: 1px solid transparent;
-    width: 100%;
+    width: calc(100% - 12px);
+    box-sizing: border-box;
+    margin-right: 12px;
+    overflow: hidden;
     height: 34px;
     padding: 6px 12px;
     font-size: 14px;
+}
+
+.dralt-cal-mask > div {
+    width: 200px;
 }

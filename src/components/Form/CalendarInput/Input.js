@@ -5,13 +5,18 @@ class Input extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            display: "",
-            raw: ""
+            display: ""
         };
 
         this.selectionStart = 0;
         this.selectionEnd = 0;
+
+        this.maskRef = null;
     }
+
+    setMaskRef = el => {
+        this.maskRef = el;
+    };
 
     componentDidUpdate(prevProps) {
         const {selectedValue} = this.props;
@@ -395,6 +400,8 @@ class Input extends React.Component {
         if(this.isComplete(newValue)) {
             const date = moment(newValue, "YYYY/MM/DD hh:mm A");
             this.props.onDatePick(date);
+        } else if(newValue === "") {
+            this.props.onClear();
         }
 
         this.setState({display: newValue}, () => {
@@ -418,7 +425,13 @@ class Input extends React.Component {
     };
 
     handleSelect = event => {
-        const {selectionStart, selectionEnd} = event.target;
+        const {target} = event;
+        const {selectionStart, selectionEnd} = target;
+
+        if(this.maskRef) {
+            this.maskRef.scrollLeft = target.scrollLeft;
+        }
+
         this.selectionStart = selectionStart;
         this.selectionEnd = selectionEnd;
     };
@@ -448,10 +461,12 @@ class Input extends React.Component {
         };
 
         return (
-            <div ref={this.props.containerRef} className="dralt-cal-input-container">
-                <div className="dralt-cal-mask">
-                    <span style={{color: 'white'}}>{display}</span>
-                    <span>{mask.substr(display.length)}</span>
+            <div ref={this.props.containerRef} style={{backgroundColor: 'white'}} className="dralt-cal-input-container">
+                <div ref={this.setMaskRef} className="dralt-cal-mask">
+                    <div>
+                        <span style={{color: 'white'}}>{display}</span>
+                        <span>{mask.substr(display.length)}</span>
+                    </div>
                 </div>
                 <input className="form-control" style={inputStyle} ref={innerRef} spellCheck={false}
                        onFocus={onFocus} value={display} onChange={this.handleChange} onSelect={this.handleSelect}
