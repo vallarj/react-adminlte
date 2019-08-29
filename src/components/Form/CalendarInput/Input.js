@@ -509,9 +509,10 @@ class Input extends React.Component {
         };
 
         return (
-            <div ref={this.props.containerRef} style={{backgroundColor: 'white'}} className="dralt-cal-input-container">
+            <div ref={this.props.containerRef} style={{backgroundColor: disabled ? "#eee" : 'white'}}
+                 className="dralt-cal-input-container">
                 {
-                    manualInput &&
+                    manualInput && !disabled &&
                     <div ref={this.setMaskRef} className="dralt-cal-mask">
                         <div>
                             <span style={{color: 'white'}}>{display}</span>
