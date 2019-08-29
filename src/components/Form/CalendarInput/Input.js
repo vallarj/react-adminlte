@@ -522,7 +522,7 @@ class Input extends React.Component {
                 }
                 <input className="form-control" style={inputStyle} ref={innerRef} spellCheck={false}
                        onFocus={onFocus} value={display} onChange={this.handleChange} onSelect={this.handleSelect}
-                       disabled={disabled} readOnly={!manualInput}/>
+                       onMouseDown={this.props.onMouseDown} disabled={disabled} readOnly={!manualInput}/>
             </div>
         );
     }
