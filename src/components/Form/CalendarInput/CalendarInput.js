@@ -41,7 +41,7 @@ class CalendarInput extends React.Component {
 
     componentDidUpdate(prevProps, prevState) {
         const {currentView, viewDate, isFocused} = this.state;
-        const {value, datePicker, timePicker} = this.props;
+        const {value, datePicker, timePicker, disabled} = this.props;
 
         if((currentView === "none" && currentView !== prevState.currentView) ||
             value !== prevProps.value) {
@@ -50,7 +50,7 @@ class CalendarInput extends React.Component {
         }
 
         if(isFocused !== prevState.isFocused) {
-            if(isFocused) {
+            if(isFocused && !disabled) {
                 this.setState({currentView: datePicker || !timePicker ? "day" : "time"});
                 document.addEventListener('keydown', this.handleKeyDown);
             } else {
