@@ -146,7 +146,8 @@ class CalendarInput extends React.Component {
                                            onFocus={this.handleInputFocus} disabled={this.props.disabled}
                                            datePicker={this.props.datePicker} timePicker={this.props.timePicker}
                                            onDatePick={this.handleDatePick} isFocused={this.state.isFocused}
-                                           onClear={this.handleClear} isSelectableDate={this.props.isSelectableDate}/>
+                                           onClear={this.handleClear} isSelectableDate={this.props.isSelectableDate}
+                                           manualInput={this.props.manualInput}/>
                                 </div>
                             }
                         </Reference>
@@ -197,6 +198,7 @@ CalendarInput.defaultProps = {
     iconClass: "fa fa-calendar",
     datePicker: true,
     timePicker: true,
+    manualInput: true,
     value: null,
     isSelectableDate: () => true,
     onChange: () => {}

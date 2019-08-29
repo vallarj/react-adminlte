@@ -499,7 +499,7 @@ class Input extends React.Component {
     };
 
     render() {
-        const {disabled, innerRef, onFocus} = this.props;
+        const {disabled, innerRef, onFocus, manualInput} = this.props;
         const {display, textError} = this.state;
         const mask = this.getMask();
 
@@ -510,15 +510,18 @@ class Input extends React.Component {
 
         return (
             <div ref={this.props.containerRef} style={{backgroundColor: 'white'}} className="dralt-cal-input-container">
-                <div ref={this.setMaskRef} className="dralt-cal-mask">
-                    <div>
-                        <span style={{color: 'white'}}>{display}</span>
-                        <span>{mask.substr(display.length)}</span>
+                {
+                    manualInput &&
+                    <div ref={this.setMaskRef} className="dralt-cal-mask">
+                        <div>
+                            <span style={{color: 'white'}}>{display}</span>
+                            <span>{mask.substr(display.length)}</span>
+                        </div>
                     </div>
-                </div>
+                }
                 <input className="form-control" style={inputStyle} ref={innerRef} spellCheck={false}
                        onFocus={onFocus} value={display} onChange={this.handleChange} onSelect={this.handleSelect}
-                       disabled={disabled}/>
+                       disabled={disabled} readOnly={!manualInput}/>
             </div>
         );
     }
