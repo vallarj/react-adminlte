@@ -319,13 +319,11 @@ class Input extends React.Component {
 
     replaceAtPosition = (value, position, insertion) => {
         const {datePicker, timePicker} = this.props;
-        console.log(position);
         if(datePicker) {
             if(position <= 9) {
                 const [newValue, offset] = this.dateReplaceAtPosition(value, position, insertion, 0);
                 // return [newValue, offset];
                 if(position + offset === 10 && offset >= 1) {
-                    console.log(newValue.substring(0, 10) + ' ' + newValue.substring(11));
                     return [newValue.substring(0, 10) + ' ' + newValue.substring(11), offset + 1]
                 } else {
                     return [newValue, offset];
@@ -414,8 +412,21 @@ class Input extends React.Component {
 
         // Set component value if complete
         if(this.isComplete(newValue)) {
-            const date = moment(newValue, "YYYY/MM/DD hh:mm A");
-            this.props.onDatePick(date);
+            // Get selected date
+            const {selectedDate, datePicker, timePicker} = this.props;
+            const format = [];
+            if(datePicker || !timePicker) {
+                format.push("YYYY/MM/DD");
+            }
+
+            if(timePicker) {
+                format.push("hh:mm A");
+            }
+
+            const parseDate = moment(newValue, format.join(' '));
+            const newDate = selectedDate && timePicker && !datePicker ?
+                selectedDate.hour(parseDate.hour()).minute(parseDate.minute()) : parseDate;
+            this.props.onDatePick(newDate);
         } else if(newValue === "") {
             this.props.onClear();
         }
