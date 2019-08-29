@@ -66,17 +66,19 @@ class Input extends React.Component {
             } else if(position === 4 || position === 5) {
                 if(insertion.match(/^\d$/)) {
                     const onesMonth = value[this.getOffsetPosition(6, offset)];
-                    if(onesMonth) {
+                    if(insertion > '1') {
+                        newInsertion = '0' + insertion;
+                    } else if(onesMonth) {
                         const month = insertion + onesMonth;
                         if(month > '12') {
-                            newInsertion = '12';
+                            newInsertion = '0' + insertion;
                         } else if(month < '01') {
                             newInsertion = '01';
                         } else {
                             newInsertion = insertion;
                         }
                     } else {
-                        newInsertion = insertion > '1' ? "0" + insertion : insertion;
+                        newInsertion = insertion;
                     }
 
                     if(position === 4) {
@@ -103,17 +105,19 @@ class Input extends React.Component {
                     const daysInMonth = moment(value.substring(0, 7), 'YYYY/MM').daysInMonth().toString(10);
                     if(position === 7 || position === 8) {
                         const onesDay = value[this.getOffsetPosition(9, offset)];
-                        if(onesDay) {
+                        if(insertion > daysInMonth[0]) {
+                            newInsertion = '0' + insertion;
+                        } else if(onesDay) {
                             const day = insertion + onesDay;
                             if(day > daysInMonth) {
-                                newInsertion = daysInMonth;
+                                newInsertion = '0' + insertion;
                             } else if(day < '01') {
                                 newInsertion = '01';
                             } else {
                                 newInsertion = insertion;
                             }
                         } else {
-                            newInsertion = insertion > daysInMonth[0] ? "0" + insertion : insertion;
+                            newInsertion = insertion;
                         }
 
                         if(position === 7) {
@@ -172,10 +176,12 @@ class Input extends React.Component {
             if(position === 0) {
                 if(insertion.match(/^\d$/)) {
                     const onesHour = value[this.getOffsetPosition(1, offset)];
-                    if(onesHour) {
+                    if(insertion > '1') {
+                        newInsertion = '0' + insertion;
+                    } else if(onesHour) {
                         const hour = insertion + onesHour;
                         if(hour > '12') {
-                            newInsertion = '12';
+                            newInsertion = '0' + insertion;
                         } else if(hour < '01') {
                             newInsertion = '01';
                         } else {
@@ -201,7 +207,9 @@ class Input extends React.Component {
             } else if(position === 2 || position === 3) {
                 if(insertion.match(/^\d$/)) {
                     const onesMinute = value[this.getOffsetPosition(4, offset)];
-                    if(onesMinute) {
+                    if(insertion > '5') {
+                        newInsertion = '0' + insertion;
+                    } else if(onesMinute) {
                         const minute = insertion + onesMinute;
                         if(minute > '59') {
                             newInsertion = '00';
@@ -209,7 +217,7 @@ class Input extends React.Component {
                             newInsertion = insertion;
                         }
                     } else {
-                        newInsertion = insertion > '5' ? '0' + insertion : insertion;
+                        newInsertion = insertion;
                     }
 
                     if(position === 2) {
@@ -311,9 +319,17 @@ class Input extends React.Component {
 
     replaceAtPosition = (value, position, insertion) => {
         const {datePicker, timePicker} = this.props;
+        console.log(position);
         if(datePicker) {
             if(position <= 9) {
-                return this.dateReplaceAtPosition(value, position, insertion, 0);
+                const [newValue, offset] = this.dateReplaceAtPosition(value, position, insertion, 0);
+                // return [newValue, offset];
+                if(position + offset === 10 && offset >= 1) {
+                    console.log(newValue.substring(0, 10) + ' ' + newValue.substring(11));
+                    return [newValue.substring(0, 10) + ' ' + newValue.substring(11), offset + 1]
+                } else {
+                    return [newValue, offset];
+                }
             } else if(timePicker) {
                 if(position === 10) {
                     if(insertion === ' ') {
@@ -440,7 +456,7 @@ class Input extends React.Component {
         const {datePicker, timePicker} = this.props;
         let mask = [];
         if(datePicker) {
-            mask.push("yyyy/mm/dd");
+            mask.push("YYYY/MM/DD");
         }
 
         if(timePicker) {
