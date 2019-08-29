@@ -5,7 +5,8 @@ class Input extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            display: ""
+            display: "",
+            textError: false,
         };
 
         this.selectionStart = 0;
@@ -16,6 +17,17 @@ class Input extends React.Component {
 
     setMaskRef = el => {
         this.maskRef = el;
+    };
+
+    blink = () => {
+        let times = 0;
+        let blinkInterval = setInterval(() => {
+            this.setState({ textError: !this.state.textError });
+
+            if(++times >= 4 && !this.state.textError) {
+                clearInterval(blinkInterval);
+            }
+        }, 70);
     };
 
     componentDidUpdate(prevProps) {
@@ -411,9 +423,10 @@ class Input extends React.Component {
         const newCursor = deleteOffset ? cursor : changeStart + offset;
 
         // Set component value if complete
+        let setDisplay = true;
         if(this.isComplete(newValue)) {
             // Get selected date
-            const {selectedDate, datePicker, timePicker} = this.props;
+            const {selectedDate, datePicker, timePicker, isSelectableDate} = this.props;
             const format = [];
             if(datePicker || !timePicker) {
                 format.push("YYYY/MM/DD");
@@ -426,14 +439,22 @@ class Input extends React.Component {
             const parseDate = moment(newValue, format.join(' '));
             const newDate = selectedDate && timePicker && !datePicker ?
                 selectedDate.hour(parseDate.hour()).minute(parseDate.minute()) : parseDate;
-            this.props.onDatePick(newDate);
+
+            if(!isSelectableDate(newDate)) {
+                this.blink();
+                setDisplay = false;
+            } else {
+                this.props.onDatePick(newDate);
+            }
         } else if(newValue === "") {
             this.props.onClear();
         }
 
-        this.setState({display: newValue}, () => {
-            target.setSelectionRange(newCursor, newCursor);
-        });
+        if(setDisplay) {
+            this.setState({display: newValue}, () => {
+                target.setSelectionRange(newCursor, newCursor);
+            });
+        }
     };
 
     isComplete = value => {
@@ -479,12 +500,12 @@ class Input extends React.Component {
 
     render() {
         const {disabled, innerRef, onFocus} = this.props;
-        const {display} = this.state;
+        const {display, textError} = this.state;
         const mask = this.getMask();
 
         const inputStyle = {
-            //backgroundColor: this.props.disabled ? "#eee" : "#fff",
-            borderColor: this.props.isFocused ? "#3c8dbc" : undefined
+            borderColor: this.props.isFocused ? "#3c8dbc" : undefined,
+            color: textError ? "#aaa" : undefined
         };
 
         return (

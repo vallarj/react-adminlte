@@ -146,7 +146,7 @@ class CalendarInput extends React.Component {
                                            onFocus={this.handleInputFocus} disabled={this.props.disabled}
                                            datePicker={this.props.datePicker} timePicker={this.props.timePicker}
                                            onDatePick={this.handleDatePick} isFocused={this.state.isFocused}
-                                           onClear={this.handleClear}/>
+                                           onClear={this.handleClear} isSelectableDate={this.props.isSelectableDate}/>
                                 </div>
                             }
                         </Reference>
